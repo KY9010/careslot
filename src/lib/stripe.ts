@@ -13,6 +13,13 @@ if (key && key.startsWith("sk_live_")) {
 export const stripe = key ? new Stripe(key) : null;
 export const paymentsEnabled = stripe !== null;
 
+/** Public URL of this app, used for Stripe's redirect links. */
 export function appUrl() {
-  return (process.env.APP_URL || "http://localhost:3000").replace(/\/$/, "");
+  if (process.env.APP_URL) return process.env.APP_URL.replace(/\/$/, "");
+  // On Vercel these are set automatically, so no manual setup is needed.
+  if (process.env.VERCEL_ENV === "production" && process.env.VERCEL_PROJECT_PRODUCTION_URL) {
+    return `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}`;
+  }
+  if (process.env.VERCEL_URL) return `https://${process.env.VERCEL_URL}`;
+  return "http://localhost:3000";
 }
