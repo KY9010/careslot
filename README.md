@@ -2,7 +2,7 @@
 
 **A small practice-management app for clinics.** Patients book appointments and pay a deposit; clinicians manage their schedule and record visits.
 
-**Live demo:** _coming soon_ · No sign-up needed: use the **"Try the demo"** buttons on the home page.
+**Live demo:** https://careslot-red.vercel.app · No sign-up needed: use the **"Try the demo"** buttons on the home page.
 
 > Demo project. Please don't enter real health information. Payments run in Stripe **test mode**: pay with card `4242 4242 4242 4242`, any future expiry date, any CVC.
 
