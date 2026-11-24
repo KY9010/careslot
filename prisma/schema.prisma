@@ -1,0 +1,73 @@
+// CareSlot data model. Learn more: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum Role {
+  PATIENT
+  CLINICIAN
+}
+
+enum AppointmentStatus {
+  PENDING_PAYMENT // slot is held while the patient pays the deposit
+  CONFIRMED
+  COMPLETED
+  CANCELLED
+  NO_SHOW
+}
+
+model User {
+  id           String        @id @default(cuid())
+  email        String        @unique
+  name         String
+  passwordHash String
+  role         Role          @default(PATIENT)
+  createdAt    DateTime      @default(now())
+  clinician    Clinician?
+  appointments Appointment[] @relation("PatientAppointments")
+}
+
+model Clinician {
+  id           String        @id @default(cuid())
+  userId       String        @unique
+  user         User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  specialty    String
+  bio          String
+  appointments Appointment[]
+}
+
+model Appointment {
+  id          String            @id @default(cuid())
+  patientId   String
+  patient     User              @relation("PatientAppointments", fields: [patientId], references: [id], onDelete: Cascade)
+  clinicianId String
+  clinician   Clinician         @relation(fields: [clinicianId], references: [id], onDelete: Cascade)
+  startsAt    DateTime
+  endsAt      DateTime
+  reason      String
+  status      AppointmentStatus @default(PENDING_PAYMENT)
+
+  // Double-booking guard: "<clinicianId>_<startsAt ISO>" while the appointment
+  // holds the slot, NULL once cancelled. Postgres allows many NULLs in a unique
+  // column, so a cancelled slot can be booked again, but two active
+  // appointments can never share a slot, even if two requests race.
+  slotKey String? @unique
+
+  depositCents          Int       @default(2500)
+  stripeSessionId       String?   @unique
+  stripePaymentIntentId String?
+  paidAt                DateTime?
+  refundedAt            DateTime?
+  notes                 String?
+  createdAt             DateTime  @default(now())
+  updatedAt             DateTime  @updatedAt
+
+  @@index([patientId, startsAt])
+  @@index([clinicianId, startsAt])
+}

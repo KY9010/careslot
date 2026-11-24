@@ -1,0 +1,15 @@
+# Local PostgreSQL for development: run `docker compose up -d`
+services:
+  db:
+    image: postgres:17
+    container_name: careslot-db
+    environment:
+      POSTGRES_USER: careslot
+      POSTGRES_PASSWORD: careslot
+      POSTGRES_DB: careslot
+    ports:
+      - "5433:5432"
+    volumes:
+      - careslot-db-data:/var/lib/postgresql/data
+volumes:
+  careslot-db-data:
